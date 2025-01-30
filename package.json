@@ -7,7 +7,7 @@
     "serve": "http-server ./dist",
     "start": "webpack serve --open",
     "build": "webpack --mode production",
-    "dev": "webpack --mode development --watch",
+    "dev": "webpack serve --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

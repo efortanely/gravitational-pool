@@ -40,7 +40,7 @@ setup() {
         echo "Installing dependencies..."
         npm install
         npm install --save-dev ts-loader webpack-dev-server http-server
-        tsc ./src/index.ts --outDir ./dist/index.js
+        tsc --project tsconfig.json
         
         # Update package.json scripts if needed
         if ! grep -q "\"serve\":" package.json; then
