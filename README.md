@@ -20,6 +20,12 @@ chmod +x run.sh
 
 ## Quick Start
 
+0. Debugging:
+```bash
+./run.sh dev_pipeline
+```
+This will run clean, setup, build, and dev sequentially. Easy peasy!
+
 1. Initial Setup:
 ```bash
 ./run.sh setup
@@ -53,7 +59,7 @@ Removes built files and node_modules for clean slate
 ## Project Structure
 ```
 gravitational-pool/
-├── run.sh             # Automation scripts
+├── run.sh             # Bash script
 ├── public/            # Static files
 │   └── index.html
 ├── src/              # Source code

@@ -1,28 +1,48 @@
-const path = require('path');
+const path = require("path")
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+const ENTRY_PATH = path.resolve(__dirname, "src/index");
+const DIST_PATH = path.resolve(__dirname, "dist");
 
 module.exports = {
-  entry: './src/index.ts',
-  module: {
+   mode: "development",
+   entry: {
+      main: ENTRY_PATH,
+   },
+   output: {
+      path: DIST_PATH,
+      filename: "[name].[contenthash].js",
+      clean: true,
+      publicPath: "/",
+   },
+   module: {
     rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
+        { 
+            test: /\.css$/, 
+            use: ["style-loader", "css-loader"] },
+        {
+            test: /\.tsx?$/,
+            use: 'ts-loader',
+            exclude: /node_modules/,
+        },
+        {
+            test: /\.s[ac]ss$/,
+            use: ["style-loader", "css-loader", "sass-loader"],
+        },
     ],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      filename: "index.html",
+      template: path.resolve(__dirname, "src/index.html"),
+    }),
+  ],
+  devtool: "inline-source-map",
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'public'),
-    },
-    compress: true,
-    port: 9000,
+    static: DIST_PATH,
+    hot: true,
   },
-};
+}

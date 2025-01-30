@@ -12,12 +12,13 @@ show_help() {
     echo "Usage: ./pool-manager.sh [command]"
     echo ""
     echo "Commands:"
-    echo "  setup    - Install dependencies and setup project"
-    echo "  dev      - Start development server"
-    echo "  build    - Build production version"
-    echo "  serve    - Serve built files"
-    echo "  clean    - Remove build artifacts and dependencies"
-    echo "  help     - Show this help message"
+    echo "  setup            - Install dependencies and setup project"
+    echo "  dev              - Start development server"
+    echo "  dev_pipeline     - Run clean, setup, build, and dev commands"
+    echo "  build            - Build production version"
+    echo "  serve            - Serve built files"
+    echo "  clean            - Remove build artifacts and dependencies"
+    echo "  help             - Show this help message"
 }
 
 # Function to check if Node.js and npm are installed
@@ -39,6 +40,7 @@ setup() {
         echo "Installing dependencies..."
         npm install
         npm install --save-dev ts-loader webpack-dev-server http-server
+        tsc ./src/index.ts --outDir ./dist/index.js
         
         # Update package.json scripts if needed
         if ! grep -q "\"serve\":" package.json; then
@@ -95,6 +97,15 @@ clean() {
     echo -e "${GREEN}Clean complete! Run setup command to reinstall dependencies.${NC}"
 }
 
+# Run dev pipeline: clean, build, and dev
+dev_pipeline() {
+    echo -e "${BLUE}Running pipeline for dev build: clean, setup, build, dev...${NC}"
+    clean
+    setup
+    build
+    dev
+}
+
 # Main script execution
 check_prerequisites
 
@@ -114,6 +125,9 @@ case "$1" in
         ;;
     "clean")
         clean
+        ;;
+    "dev_pipeline")
+        dev_pipeline
         ;;
     "help"|"")
         show_help

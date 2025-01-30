@@ -120,7 +120,7 @@ class Engine {
         this.view = new View();
         
         // Create p5 instance
-        this.p5Instance = new p5((p: p5) => {
+        this.p5Instance = new p5(p => {
             p.setup = () => this.setup(p);
             p.draw = () => this.draw(p);
         });

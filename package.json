@@ -1,7 +1,7 @@
 {
   "name": "gravitational-pool",
   "version": "1.0.0",
-  "description": "",
+  "description": "A unique twist on the classic pool game where balls interact through gravitational forces instead of traditional collision physics. The 8-ball has a stronger gravitational pull, creating an interesting gameplay dynamic where players must account for gravitational effects while planning their shots.",
   "main": "index.js",
   "scripts": {
     "serve": "http-server ./dist",
@@ -23,17 +23,21 @@
   "homepage": "https://github.com/efortanely/gravitational-pool#readme",
   "dependencies": {
     "@types/p5": "^1.7.6",
+    "express": "^4.21.2",
     "p5": "^1.11.3"
   },
   "devDependencies": {
     "@types/node": "^22.12.0",
+    "html-webpack-plugin": "^5.6.3",
     "http-server": "^14.1.1",
     "promises": "^0.2.5",
+    "sass": "^1.83.4",
+    "sass-loader": "^16.0.4",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.0"
+    "webpack-dev-server": "^4.10.1"
   }
 }
