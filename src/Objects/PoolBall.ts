@@ -1,4 +1,4 @@
-import p5 from 'p5';
+import p5, { Vector } from 'p5';
 import { Vector2D, BallState } from '../types';
 
 export class PoolBall {
@@ -14,6 +14,15 @@ export class PoolBall {
         this.mass = mass;
         this.radius = Math.sqrt(mass) * 5; // Scale radius with mass
         this.color = color;
+    }
+
+    // TODO fix: this is too strong
+    public applyCentripetalForce(): void {
+        const friction = 0.1;
+        const velocity = this.getVelocity();
+        const centripetalForce = { x: -friction * velocity.x, y: -friction * velocity.y };
+        this.velocity.x += centripetalForce.x;
+        this.velocity.y += centripetalForce.y;
     }
 
     public applyForce(force: Vector2D): void {
@@ -35,6 +44,7 @@ export class PoolBall {
     }
 
     public draw(p: p5): void {
+        p.noStroke();
         p.fill(this.color);
         p.circle(this.position.x, this.position.y, this.radius * 2);
         console.log("Drawing ball at", this.position);
@@ -63,7 +73,7 @@ export class PoolBall {
 
 // Special class for the 8 ball with stronger gravitational pull
 export class EightBall extends PoolBall {
-    private readonly gravitationalMultiplier: number = 3;
+    private readonly gravitationalMultiplier: number = 10;
 
     constructor(x: number, y: number) {
         super(x, y, 20, '#000000'); // Black color, larger mass
@@ -85,5 +95,13 @@ export class EightBall extends PoolBall {
             x: (force * dx) / distance,
             y: (force * dy) / distance
         };
+    }
+
+    public draw(p: p5): void {
+        p.fill(this.color);
+        p.circle(this.position.x, this.position.y, this.radius * 2);
+        console.log("Drawing ball at", this.position);
+        // put white border around
+        p.stroke(255);
     }
 }

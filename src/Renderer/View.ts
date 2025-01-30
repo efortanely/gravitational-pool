@@ -1,10 +1,16 @@
 import { Engine } from "../GameLogic/Engine";
-import { GameState } from "../types";
+import { GameState, ViewportSize } from "../types";
 import p5 from 'p5';
 
 // View handler for game rendering
 export class View {
     private currentState: GameState = GameState.START;
+    private viewportSize: ViewportSize;
+    private seed: number = 0;
+
+    constructor(size: ViewportSize) {
+        this.viewportSize = size;
+    }
 
     public getCurrentState(): GameState {
         return this.currentState;
@@ -15,17 +21,16 @@ export class View {
     }
 
     public render(p: p5): void {
-        // Starry background (for START and GAME_OVER screens)
-        this.drawStarryBackground(p);
-
         switch (this.currentState) {
             case GameState.START:
+                this.drawStarryBackground(p);
                 this.renderStartScreen(p);
                 break;
             case GameState.PLAYING:
                 // Renders game in Engine.ts
                 break;
             case GameState.GAME_OVER:
+                this.drawStarryBackground(p);
                 this.renderGameOver(p);
                 break;
         }
@@ -50,8 +55,16 @@ export class View {
     }
 
     private drawStarryBackground(p: p5): void {
+        p.noStroke();
         p.fill(255, 255, 255, 150); // White with some transparency
-        for (let i = 0; i < 100; i++) {
+        p.randomSeed(this.seed); // Set random seed for consistency
+        const ticks = p.frameCount;
+
+        if (ticks % 60 === 0) {
+            this.seed += 1;
+        }
+
+        for (let i = 0; i < 50; i++) {
             const x = p.random(p.width);
             const y = p.random(p.height);
             const size = p.random(1, 3);
@@ -60,7 +73,7 @@ export class View {
     }
 
     public setup(p: p5): void {
-        p.createCanvas(800, 600);
+        p.createCanvas(this.viewportSize.width, this.viewportSize.height);
 
         // Listen for spacebar press
         p.keyPressed = () => {

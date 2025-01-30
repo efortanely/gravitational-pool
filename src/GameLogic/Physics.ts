@@ -1,13 +1,15 @@
 import { PoolBall } from "../Objects/PoolBall";
-import { Vector2D } from "../types";
+import { Vector2D, ViewportSize } from "../types";
 
 // Physics engine to handle ball interactions
 export class Physics {
     private balls: PoolBall[] = [];
-    private maxForce: number = 50; // Maximum force for cue ball hit
+    private maxForce: number = 100; // Maximum force for cue ball hit
+    private viewportSize: ViewportSize;
 
-    constructor(balls: PoolBall[] = []) {
+    constructor(viewportSize: ViewportSize, balls: PoolBall[] = []) {
         this.balls = balls;
+        this.viewportSize = viewportSize;
     }
 
     public addBall(ball: PoolBall): void {
@@ -45,8 +47,13 @@ export class Physics {
             }
         }
 
+        this.resolveWallCollisions();
+
         // Update balls
         for (const ball of this.balls) {
+            // Calculate centripetal force
+            // ball.applyCentripetalForce();
+
             ball.update();
         }
     }
@@ -60,6 +67,10 @@ export class Physics {
         // Prevent balls from sticking to each other
         const minDistance = ball1['radius'] + ball2['radius'];
         if (distance < minDistance) {
+            // Move the balls apart
+            const overlap = 0.5 * (distance - minDistance);
+            ball1.setPosition(ball1.getPosition().x - overlap * (dx / distance), ball1.getPosition().y - overlap * (dy / distance));
+
             // Normal and tangent components of velocities
             const normal = { x: dx / distance, y: dy / distance };
             const relativeVelocity = {
@@ -79,6 +90,21 @@ export class Physics {
                 // Apply impulse to each ball
                 ball1.applyForce({ x: -impulse * ball2['mass'] * normal.x, y: -impulse * ball2['mass'] * normal.y });
                 ball2.applyForce({ x: impulse * ball1['mass'] * normal.x, y: impulse * ball1['mass'] * normal.y });
+            }
+        }
+    }
+
+    private resolveWallCollisions(): void {
+        for (const ball of this.balls) {
+            const position = ball.getPosition();
+            const radius = ball['radius'];
+
+            // Check for collisions with walls
+            if (position.x - radius < 0 || position.x + radius > this.viewportSize.width) {
+                ball['velocity'].x *= -1;
+            }
+            if (position.y - radius < 0 || position.y + radius > this.viewportSize.height) {
+                ball['velocity'].y *= -1;
             }
         }
     }

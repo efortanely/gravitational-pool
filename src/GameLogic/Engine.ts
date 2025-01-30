@@ -1,6 +1,6 @@
 import { Physics } from './Physics';
 import { PoolBall, EightBall } from '../Objects/PoolBall';
-import { Vector2D, GameState } from '../types';
+import { Vector2D, GameState, ViewportSize } from '../types';
 import { View } from '../Renderer/View';
 import p5 from 'p5';
 
@@ -13,11 +13,12 @@ export class Engine {
     private cueBall: PoolBall;
     private initialMousePosition: Vector2D = { x: 0, y: 0 };
     private isMousePressed: boolean = false;
+    private viewportSize = { width: 800, height: 600 };
 
     constructor() {
         const eightBall = new EightBall(400, 300);
-        this.physics = new Physics();
-        this.view = new View();
+        this.physics = new Physics(this.viewportSize);
+        this.view = new View(this.viewportSize);
 
         // Create cue ball (white ball)
         this.cueBall = new PoolBall(300, 500, 10, '#FFFFFF'); // White cue ball
@@ -108,13 +109,12 @@ export class Engine {
     }
 
     private draw(p: p5): void {
-        // p.background(220);
-        p.background(0); // Clear the background to black (starry background can be added here)
+        const green = '#008000';
+        p.background(green);
         this.physics.update();
 
         // Render all balls (cue ball + object balls) when in PLAYING state
         if (this.view.getCurrentState() === GameState.PLAYING) {
-            console.log('Rendering balls', this.balls.length);
             for (const ball of this.balls) {
                 ball.draw(p);
             }
