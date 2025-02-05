@@ -99,28 +99,26 @@ export class Physics {
         for (const ball of this.balls) {
             const position = ball.getPosition();
             const radius = ball['radius'];
+            const diameter = 2 * radius;
+            const diff = 1;
     
-            // Check and resolve left/right wall collisions
-            if (position.x - radius < 0) {
-                // Stuck in left wall - move right
-                ball.setPosition(radius, position.y);
-                ball['velocity'].x *= -1;
-            } else if (position.x + radius > this.viewportSize.width) {
-                // Stuck in right wall - move left
-                ball.setPosition(this.viewportSize.width - radius, position.y);
-                ball['velocity'].x *= -1;
+            // Left and right wall collision
+            if (position.x - diff < 0) {  // Left side
+                ball.setPosition(diff, position.y);  // Move to the right side
+                ball['velocity'].x *= -1;  // Reflect velocity
+            } else if (position.x + diameter > this.viewportSize.width) {  // Right side
+                ball.setPosition(this.viewportSize.width - diameter, position.y);  // Move to the left side
+                ball['velocity'].x *= -1;  // Reflect velocity
             }
     
-            // Check and resolve top/bottom wall collisions
-            if (position.y - radius < 0) {
-                // Stuck in top wall - move down
-                ball.setPosition(position.x, radius);
-                ball['velocity'].y *= -1;
-            } else if (position.y + radius > this.viewportSize.height) {
-                // Stuck in bottom wall - move up
-                ball.setPosition(position.x, this.viewportSize.height - radius);
-                ball['velocity'].y *= -1;
+            // Top and bottom wall collision
+            if (position.y - diff < 0) {  // Top side
+                ball.setPosition(position.x, diff);  // Move down
+                ball['velocity'].y *= -1;  // Reflect velocity
+            } else if (position.y + diameter > this.viewportSize.height) {  // Bottom side
+                ball.setPosition(position.x, this.viewportSize.height - diameter);  // Move up
+                ball['velocity'].y *= -1;  // Reflect velocity
             }
         }
-    }
+    }     
 }
