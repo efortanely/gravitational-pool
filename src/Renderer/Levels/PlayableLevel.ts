@@ -1,7 +1,6 @@
 import { Level } from "./Level";
-import { Physics } from '../../GameLogic/Physics'
+import { Physics } from '../../GameLogic/Physics';
 import { PoolBall } from '../../Objects/PoolBall';
-import { EightBall } from '../../Objects/EightBall';
 import { Vector2D, ViewportSize } from '../../types';
 import p5 from 'p5';
 
@@ -11,7 +10,7 @@ export class PlayableLevel extends Level {
     private initialMousePosition: Vector2D = { x: 0, y: 0 };
     private isMousePressed: boolean = false;
 
-    constructor(seed: number, viewportSize: ViewportSize){
+    constructor(seed: number, viewportSize: ViewportSize) {
         super(seed);
         this.physics = new Physics(viewportSize);
 
@@ -20,21 +19,27 @@ export class PlayableLevel extends Level {
     }
 
     private createObjectBalls(): void {
-        // Arrange the balls in a triangle rack formation
         const positions = this.generateRackPositions();
-        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#000000', '#FF8800', '#FF44BB', '#00AAFF', '#660000', '#111111', '#FF3366', '#339933', '#FF9933']; // Ball colors
+
         let colorIndex = 0;
 
-        const cueBall = new PoolBall(positions['cueBallPosition'].x, positions['cueBallPosition'].y, 10, '#FFFFFF', true);
+        // Cue Ball
+        const cueBall = new PoolBall(
+            positions.cueBallPosition.x, 
+            positions.cueBallPosition.y, 
+            15, // Corrected size
+            0,
+            true
+        );
         this.balls.push(cueBall);
 
-        for (let i = 0; i < 15; i++) {
-            const pos = positions["rackPositions"][i];
-            const color = colors[colorIndex % colors.length];
-            let ball = new PoolBall(pos.x, pos.y, 10, color, false);
-            
-            if (i == 8){
-                ball = new EightBall(pos.x, pos.y, 10, 'black');
+        // Rack Balls
+        for (let i = 0; i < positions.rackPositions.length; i++) {
+            const pos = positions.rackPositions[i];
+
+            let ball = new PoolBall(pos.x, pos.y, 15, i+1, false);
+            if (i === 4) { // 8-ball in center of triangle
+                ball.mass = 20;
             }
 
             this.balls.push(ball);
@@ -81,34 +86,28 @@ export class PlayableLevel extends Level {
     }
 
     public handleMousePressed(p: p5): void {
-        // Save the initial position of the mouse when it's pressed
         this.initialMousePosition = { x: p.mouseX, y: p.mouseY };
-        console.log('Mouse pressed at', this.initialMousePosition);
         this.isMousePressed = true;
     }
     
     public handleMouseReleased(p: p5): void {
         if (this.isMousePressed) {
-            // Calculate the displacement of the mouse from the initial position
             const deltaX = p.mouseX - this.initialMousePosition.x;
             const deltaY = p.mouseY - this.initialMousePosition.y;
-    
-            // Create force vector based on mouse movement, inverted to simulate pulling back the cue stick
+
             const force = { 
-                x: -deltaX * 0.1, // Adjust the scale factor (0.1) for appropriate force
-                y: -deltaY * 0.1
+                x: -deltaX * 0.2, 
+                y: -deltaY * 0.2
             };
-    
-            // Apply force to the cue ball through physics engine
-            this.physics.applyForceToCueBall(force);
-    
-            console.log(`Force applied: (${force.x}, ${force.y})`);
-    
-            // Reset mouse pressed state after release
+
+            if (Math.abs(force.x) > 0.5 || Math.abs(force.y) > 0.5) {
+                this.physics.applyForceToCueBall(force);
+            }
+
             this.isMousePressed = false;
         }
     }
-    
+
     public handleMouseDragged(p: p5): void {
         if (this.isMousePressed) {
             // Calculate displacement to visualize drag (no force applied here)
@@ -138,4 +137,4 @@ export class PlayableLevel extends Level {
             ball.draw(p);
         }
     }
-}    
+}

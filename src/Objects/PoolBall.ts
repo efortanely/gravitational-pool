@@ -1,43 +1,72 @@
 import p5 from 'p5';
 import { Vector2D } from '../types';
-import cueBallImage from '../public/cue.png'; // Cue ball image
-import verticalGif from '../public/8_ball_vert.gif';
-import horizontalGif from '../public/8_ball_horizont.gif';
-import stillBallImage from '../public/8_ball.png'; // Stationary image
+
+// Spritesheets for each ball
+import ball1Sprite from '../public/balls/1ball.png';
+import ball2Sprite from '../public/balls/2ball.png';
+import ball3Sprite from '../public/balls/3ball.png';
+import ball4Sprite from '../public/balls/4ball.png';
+import ball5Sprite from '../public/balls/5ball.png';
+import ball6Sprite from '../public/balls/6ball.png';
+import ball7Sprite from '../public/balls/7ball.png';
+import ball8Sprite from '../public/balls/8ball.png';
+import ball9Sprite from '../public/balls/9ball.png';
+import ball10Sprite from '../public/balls/10ball.png';
+import ball11Sprite from '../public/balls/11ball.png';
+import ball12Sprite from '../public/balls/12ball.png';
+import ball13Sprite from '../public/balls/13ball.png';
+import ball14Sprite from '../public/balls/14ball.png';
+import ball15Sprite from '../public/balls/15ball.png';
+import cueBallSprite from '../public/balls/cueball.png';
 
 export class PoolBall {
     protected position: Vector2D;
     public velocity: Vector2D;
     public mass: number;
     public radius: number;
-    protected color: string;
     protected image: p5.Image | null = null;
-
-    protected verticalGif: p5.Image | null = null;
-    protected horizontalGif: p5.Image | null = null;
-
-    protected isGifPlaying: boolean = false;
+    protected spritesheet: p5.Image | null = null;
     protected isCueBall: boolean;
-    protected speedFactor: number = 0.2; // Controls gif frame rate
-
-    constructor(x: number, y: number, mass: number, color: string, isCueBall: boolean) {
+    protected frameIndex: number = 0;
+    protected totalFrames: number = 15;
+    protected ballType: number;
+    private lastFrameTime: number = 0;
+    private frameDelay: number = 100; // Base time delay (ms) between frames
+    
+    constructor(x: number, y: number, mass: number, ballType: number, isCueBall: boolean) {
         this.position = { x, y };
         this.velocity = { x: 0, y: 0 };
         this.mass = mass;
-        this.radius = Math.sqrt(mass) * 5; // Scale radius with mass
-        this.color = color;
+        this.radius = 15; // Updated radius to 15
         this.isCueBall = isCueBall;
+        this.ballType = ballType;
     }
 
-    /** Preloads images and gifs */
+    /** Preloads images and spritesheets */
     public preload(p: p5): void {
-        if (this.isCueBall) {
-            this.image = p.loadImage(cueBallImage) as p5.Image;
-        } else {
-            // Load gifs as images
-            this.verticalGif = p.loadImage(verticalGif) as p5.Image;
-            this.horizontalGif = p.loadImage(horizontalGif) as p5.Image;
-            this.image = p.loadImage(stillBallImage) as p5.Image; // Load still image
+        this.spritesheet = p.loadImage(this.getSpriteSheet());
+    }
+
+    /** Returns correct spritesheet for the ball type */
+    private getSpriteSheet(): string {
+        switch (this.ballType) {
+            case 0: return cueBallSprite;
+            case 1: return ball1Sprite;
+            case 2: return ball2Sprite;
+            case 3: return ball3Sprite;
+            case 4: return ball4Sprite;
+            case 5: return ball5Sprite;
+            case 6: return ball6Sprite;
+            case 7: return ball7Sprite;
+            case 8: return ball8Sprite;
+            case 9: return ball9Sprite;
+            case 10: return ball10Sprite;
+            case 11: return ball11Sprite;
+            case 12: return ball12Sprite;
+            case 13: return ball13Sprite;
+            case 14: return ball14Sprite;
+            case 15: return ball15Sprite;
+            default: throw new Error(`Invalid ball type: ${this.ballType}`);
         }
     }
 
@@ -58,58 +87,63 @@ export class PoolBall {
     public update(p: p5): void {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-
         this.applyFriction();
 
-        // Determine if gif should play based on speed
-        const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
-        this.isGifPlaying = speed >= 0.1;
+        const currentTime = p.millis(); // Get current time in milliseconds
+        if (currentTime - this.lastFrameTime >= this.frameDelay) {
+            this.lastFrameTime = currentTime; // Update last frame time
+            const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
+
+            if (speed > 0.1) {
+                // Calculate the angle of velocity
+                const angle = p.atan2(this.velocity.y, this.velocity.x);
+                
+                // Map the angle to a frame index. 0 to 2*PI range for a full rotation.
+                this.frameIndex = Math.floor((angle + p.PI) / (2 * p.PI) * this.totalFrames);
+
+                // Adjust frame delay based on speed, faster speeds will update frames quicker
+                const speedFactor = Math.min(1, speed / 10); // Speed factor based on velocity
+                this.frameDelay = 200 * (1 - speedFactor); // Decrease frame delay with speed
+            }
+        }
     }
 
-    /** Renders the ball */
+    /** Renders the ball with sprite animation */
     public draw(p: p5): void {
         p.noStroke();
 
-        if (this.isCueBall && this.image) {
-            p.image(this.image, this.position.x, this.position.y, this.radius * 2, this.radius * 2);
-            return; // If it's the cue ball, just draw its image and exit
-        }
+        if (this.spritesheet) {
+            const frameWidth = this.spritesheet.width / this.totalFrames;
+            const frameHeight = this.spritesheet.height;
 
-        if (!this.isGifPlaying) {
-            // If it's not moving fast enough to play a gif, render the still image
-            if (this.image) {
-                p.image(this.image, this.position.x, this.position.y, this.radius * 2, this.radius * 2);
-            }
-            return;
-        }
-
-        // Choose which gif to display based on the ball's movement direction
-        const isMovingHorizontally = Math.abs(this.velocity.x) > Math.abs(this.velocity.y);
-        const gif = isMovingHorizontally ? this.horizontalGif : this.verticalGif;
-
-        if (gif) {
-            p.image(gif, this.position.x, this.position.y, this.radius * 2, this.radius * 2);
+            p.image(
+                this.spritesheet,
+                this.position.x, this.position.y,
+                this.radius * 2, this.radius * 2,
+                frameWidth * this.frameIndex, 0,
+                frameWidth, frameHeight
+            );
         }
     }
 
-    /** Getters and Setters */
-    public setPosition(x: number, y: number): void {
+    /** Handles rendering during gameplay */
+    public render(p: p5, timePlayed: number): void {
+        this.draw(p);
+    }
+
+    /** Handles mouse dragging interaction */
+    public handleMouseDragged(p: p5): void {
+        if (this.isCueBall) {
+            this.position.x = p.mouseX;
+            this.position.y = p.mouseY;
+        }
+    }
+
+    public setPosition(x: number, y: number){
         this.position = { x, y };
     }
 
-    public getPosition(): Vector2D {
+    public getPosition(): Vector2D{
         return this.position;
-    }
-
-    public getVelocity(): Vector2D {
-        return this.velocity;
-    }
-
-    public getMass(): number {
-        return this.mass;
-    }
-
-    public getRadius(): number {
-        return this.radius;
     }
 }
