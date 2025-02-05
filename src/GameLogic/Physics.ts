@@ -98,12 +98,26 @@ export class Physics {
         for (const ball of this.balls) {
             const position = ball.getPosition();
             const radius = ball['radius'];
-
-            // Check for collisions with walls
-            if (position.x - radius < 0 || position.x + radius > this.viewportSize.width) {
+    
+            // Check and resolve left/right wall collisions
+            if (position.x - radius < 0) {
+                // Stuck in left wall - move right
+                ball.setPosition(radius, position.y);
+                ball['velocity'].x *= -1;
+            } else if (position.x + radius > this.viewportSize.width) {
+                // Stuck in right wall - move left
+                ball.setPosition(this.viewportSize.width - radius, position.y);
                 ball['velocity'].x *= -1;
             }
-            if (position.y - radius < 0 || position.y + radius > this.viewportSize.height) {
+    
+            // Check and resolve top/bottom wall collisions
+            if (position.y - radius < 0) {
+                // Stuck in top wall - move down
+                ball.setPosition(position.x, radius);
+                ball['velocity'].y *= -1;
+            } else if (position.y + radius > this.viewportSize.height) {
+                // Stuck in bottom wall - move up
+                ball.setPosition(position.x, this.viewportSize.height - radius);
                 ball['velocity'].y *= -1;
             }
         }
