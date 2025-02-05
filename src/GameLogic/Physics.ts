@@ -1,3 +1,4 @@
+import p5 from "p5";
 import { PoolBall } from "../Objects/PoolBall";
 import { Vector2D, ViewportSize } from "../types";
 
@@ -35,7 +36,7 @@ export class Physics {
         cueBall.applyForce(force);
     }
 
-    public update(): void {
+    public update(p: p5): void {
         // Check for ball collisions
         for (let i = 0; i < this.balls.length; i++) {
             for (let j = i + 1; j < this.balls.length; j++) {
@@ -54,7 +55,7 @@ export class Physics {
             // Calculate centripetal force
             // ball.applyCentripetalForce();
 
-            ball.update();
+            ball.update(p);
         }
     }
 

@@ -4,6 +4,7 @@ import { PlayableLevel } from "./Levels/PlayableLevel";
 import { StartScreen } from "./Levels/StartScreen";
 import { GameState } from "../types";
 import p5 from 'p5';
+import { PoolBall } from "../Objects/PoolBall";
 
 export class Engine {
     private levels: Level[];
@@ -30,6 +31,11 @@ export class Engine {
                 p.createCanvas(this.viewportSize.width, this.viewportSize.height);
                 p.textFont('Arial');
                 p.background(0);
+            };
+
+            p.preload = () => {
+                let balls: PoolBall[] = (this.levels[1] as PlayableLevel).balls;        
+                balls.forEach(ball => ball.preload(p));
             };
             
             p.keyPressed = () => {

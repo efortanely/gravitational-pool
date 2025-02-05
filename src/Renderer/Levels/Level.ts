@@ -1,4 +1,5 @@
 import p5 from 'p5';
+import { PoolBall } from '../../Objects/PoolBall';
 
 export abstract class Level {
     private seed: number = 0;

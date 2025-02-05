@@ -1,7 +1,9 @@
+import { PoolBall } from "../../Objects/PoolBall";
 import { Level } from "./Level";
 import p5 from 'p5';
 
 export class EndScreen extends Level {
+
     constructor(seed: number){
         super(seed);
     }

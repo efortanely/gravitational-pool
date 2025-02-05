@@ -1,4 +1,4 @@
-const path = require("path")
+const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const ENTRY_PATH = path.resolve(__dirname, "src/index");
@@ -19,7 +19,8 @@ module.exports = {
     rules: [
         { 
             test: /\.css$/, 
-            use: ["style-loader", "css-loader"] },
+            use: ["style-loader", "css-loader"] 
+        },
         {
             test: /\.tsx?$/,
             use: 'ts-loader',
@@ -28,6 +29,18 @@ module.exports = {
         {
             test: /\.s[ac]ss$/,
             use: ["style-loader", "css-loader", "sass-loader"],
+        },
+        // Add this rule to handle image files
+        {
+            test: /\.(png|jpe?g|gif|svg)$/i,
+            use: [
+              {
+                loader: 'file-loader', // Or 'url-loader' for base64 embedding
+                options: {
+                  name: 'assets/images/[name].[contenthash].[ext]', // Customize the output path
+                },
+              },
+            ],
         },
     ],
   },

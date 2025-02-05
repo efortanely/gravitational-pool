@@ -7,7 +7,7 @@ import p5 from 'p5';
 
 export class PlayableLevel extends Level {
     private physics: Physics;
-    private balls: PoolBall[] = [];
+    public balls: PoolBall[] = [];
     private initialMousePosition: Vector2D = { x: 0, y: 0 };
     private isMousePressed: boolean = false;
 
@@ -25,16 +25,16 @@ export class PlayableLevel extends Level {
         const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#000000', '#FF8800', '#FF44BB', '#00AAFF', '#660000', '#111111', '#FF3366', '#339933', '#FF9933']; // Ball colors
         let colorIndex = 0;
 
-        const cueBall = new PoolBall(positions['cueBallPosition'].x, positions['cueBallPosition'].y, 10, '#FFFFFF');
+        const cueBall = new PoolBall(positions['cueBallPosition'].x, positions['cueBallPosition'].y, 10, '#FFFFFF', true);
         this.balls.push(cueBall);
 
         for (let i = 0; i < 15; i++) {
             const pos = positions["rackPositions"][i];
             const color = colors[colorIndex % colors.length];
-            let ball = new PoolBall(pos.x, pos.y, 10, color);
+            let ball = new PoolBall(pos.x, pos.y, 10, color, false);
             
             if (i == 8){
-                ball = new EightBall(pos.x, pos.y);
+                ball = new EightBall(pos.x, pos.y, 10, 'black');
             }
 
             this.balls.push(ball);
@@ -81,46 +81,61 @@ export class PlayableLevel extends Level {
     }
 
     public handleMousePressed(p: p5): void {
+        // Save the initial position of the mouse when it's pressed
         this.initialMousePosition = { x: p.mouseX, y: p.mouseY };
         console.log('Mouse pressed at', this.initialMousePosition);
         this.isMousePressed = true;
     }
-
+    
     public handleMouseReleased(p: p5): void {
         if (this.isMousePressed) {
+            // Calculate the displacement of the mouse from the initial position
             const deltaX = p.mouseX - this.initialMousePosition.x;
             const deltaY = p.mouseY - this.initialMousePosition.y;
-
-            const force = { x: -deltaX * 0.1, y: -deltaY * 0.1 }; // Invert the direction for pulling the cue stick back
+    
+            // Create force vector based on mouse movement, inverted to simulate pulling back the cue stick
+            const force = { 
+                x: -deltaX * 0.1, // Adjust the scale factor (0.1) for appropriate force
+                y: -deltaY * 0.1
+            };
+    
+            // Apply force to the cue ball through physics engine
             this.physics.applyForceToCueBall(force);
-
+    
             console.log(`Force applied: (${force.x}, ${force.y})`);
-
+    
+            // Reset mouse pressed state after release
             this.isMousePressed = false;
         }
     }
-
+    
     public handleMouseDragged(p: p5): void {
         if (this.isMousePressed) {
+            // Calculate displacement to visualize drag (no force applied here)
             const displacement = {
                 x: this.initialMousePosition.x - p.mouseX,
                 y: this.initialMousePosition.y - p.mouseY
             };
-
-            // Visualize the drag by drawing a line or force direction (optional)
+    
+            // Visualize the direction of force (cue stick) as a line
             p.stroke(0);
             p.line(p.mouseX, p.mouseY, this.initialMousePosition.x, this.initialMousePosition.y);
+    
+            // Optionally, display a circle or something at the end of the line to indicate where force is being applied
+            p.fill(255, 0, 0);
+            p.circle(p.mouseX, p.mouseY, 5); // Small red circle to mark mouse position
         }
     }
-
+    
     public render(p: p5, timePlayed: number): void {
         const green = '#008000';
         p.background(green);
-        this.physics.update();
-
-        // Render all balls (cue ball + object balls) when in PLAYING state
+        this.physics.update(p);
+    
+        // Render all balls (cue ball + object balls)
         for (const ball of this.balls) {
+            ball.update(p);
             ball.draw(p);
         }
     }
-}
+}    
