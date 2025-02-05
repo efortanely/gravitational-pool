@@ -37,7 +37,7 @@ export class PlayableLevel extends Level {
         for (let i = 0; i < positions.rackPositions.length; i++) {
             const pos = positions.rackPositions[i];
 
-            let ball = new PoolBall(pos.x, pos.y, 15, i+1, false);
+            let ball = new PoolBall(pos.x, pos.y, 15, i + 1, false);
             if (i === 4) { // 8-ball in center of triangle
                 ball.mass = 20;
             }
@@ -86,45 +86,76 @@ export class PlayableLevel extends Level {
     }
 
     public handleMousePressed(p: p5): void {
-        this.initialMousePosition = { x: p.mouseX, y: p.mouseY };
+        if (p.touches.length > 0) {
+            this.initialMousePosition = { 
+                x: (p.touches[0] as Touch).clientX, 
+                y: (p.touches[0] as Touch).clientY 
+            };
+        } else {
+            this.initialMousePosition = { 
+                x: p.mouseX, 
+                y: p.mouseY 
+            };
+        }
         this.isMousePressed = true;
     }
     
     public handleMouseReleased(p: p5): void {
         if (this.isMousePressed) {
-            const deltaX = p.mouseX - this.initialMousePosition.x;
-            const deltaY = p.mouseY - this.initialMousePosition.y;
-
+            let deltaX, deltaY;
+    
+            if (p.touches.length > 0) {
+                // Use touch positions
+                deltaX = (p.touches[0] as Touch).clientX - this.initialMousePosition.x;
+                deltaY = (p.touches[0] as Touch).clientY - this.initialMousePosition.y;
+            } else {
+                // Use mouse positions
+                deltaX = p.mouseX - this.initialMousePosition.x;
+                deltaY = p.mouseY - this.initialMousePosition.y;
+            }
+    
             const force = { 
                 x: -deltaX * 0.2, 
                 y: -deltaY * 0.2
             };
-
+    
             if (Math.abs(force.x) > 0.5 || Math.abs(force.y) > 0.5) {
                 this.physics.applyForceToCueBall(force);
             }
-
+    
             this.isMousePressed = false;
         }
     }
-
+    
     public handleMouseDragged(p: p5): void {
         if (this.isMousePressed) {
+            let mouseX, mouseY;
+    
+            if (p.touches.length > 0) {
+                // Use touch positions
+                mouseX = (p.touches[0] as Touch).clientX;
+                mouseY = (p.touches[0] as Touch).clientY;
+            } else {
+                // Use mouse positions
+                mouseX = p.mouseX;
+                mouseY = p.mouseY;
+            }
+    
             // Calculate displacement to visualize drag (no force applied here)
             const displacement = {
-                x: this.initialMousePosition.x - p.mouseX,
-                y: this.initialMousePosition.y - p.mouseY
+                x: this.initialMousePosition.x - mouseX,
+                y: this.initialMousePosition.y - mouseY
             };
     
             // Visualize the direction of force (cue stick) as a line
             p.stroke(0);
-            p.line(p.mouseX, p.mouseY, this.initialMousePosition.x, this.initialMousePosition.y);
+            p.line(mouseX, mouseY, this.initialMousePosition.x, this.initialMousePosition.y);
     
             // Optionally, display a circle or something at the end of the line to indicate where force is being applied
             p.fill(255, 0, 0);
-            p.circle(p.mouseX, p.mouseY, 5); // Small red circle to mark mouse position
+            p.circle(mouseX, mouseY, 5); // Small red circle to mark mouse position
         }
-    }
+    }     
     
     public render(p: p5, timePlayed: number): void {
         const green = '#008000';
