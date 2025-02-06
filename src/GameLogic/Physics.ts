@@ -152,5 +152,15 @@ export class Physics {
                 ball['velocity'].y *= -1;  // Reflect velocity
             }
         }
-    }     
+    }
+
+    // Method to get the velocity of a ball (assuming it's calculated or tracked)
+    public getBallVelocity(ball: PoolBall): number {
+        // Example: Calculate the speed from the velocity vector (you may already have something similar)
+        const velocityX = ball.velocity.x; // assuming velocity.x is the horizontal speed
+        const velocityY = ball.velocity.y; // assuming velocity.y is the vertical speed
+
+        // Calculate the magnitude of the velocity vector (Euclidean distance)
+        return Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+    }
 }

@@ -19,7 +19,7 @@ export class Engine {
     private lastFrameCount: number = 0;
     private isFirstPlayFrame: boolean = true;
     private sunkBalls: number = 0;
-    private totalBalls: number = 10;
+    private totalBalls: number = 15;
     // private shrinkRay: ShrinkRay;
     private poolTable: PoolTable;
 

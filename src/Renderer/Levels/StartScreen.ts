@@ -6,9 +6,8 @@ export class StartScreen extends Level {
         super(seed);
     }
 
-    handleMousePressed(p: p5): boolean {
+    handleMousePressed(p: p5): void {
         // Empty implementation required by abstract class
-        return false;
     }
     
     handleMouseReleased(p: p5): void {

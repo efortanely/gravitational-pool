@@ -29,7 +29,7 @@ export class PoolBall {
     public isCueBall: boolean;
     protected frameIndex: number = 0;
     protected totalFrames: number = 15;
-    protected ballType: number;
+    public ballType: number;
     private lastFrameTime: number = 0;
     private frameDelay: number = 100; // Base time delay (ms) between frames
     public isSunk: boolean = false;

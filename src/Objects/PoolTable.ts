@@ -5,18 +5,18 @@ import { PoolBall } from "./PoolBall";
 export class PoolTable {
     private viewportSize: ViewportSize;
     private tableColor: string = "#2E8B57"; // Green pool table
-    private pockets: Vector2D[]; // List of pocket positions
-    private pocketRadius = 50;
+    public pockets: Vector2D[]; // List of pocket positions
+    private pocketDiameter = 30;
 
     constructor(viewportSize: ViewportSize) {
         this.viewportSize = viewportSize;
         this.pockets = [
-            { x: this.pocketRadius, y: this.pocketRadius }, // Top-left pocket
-            { x: this.viewportSize.width - this.pocketRadius, y: this.pocketRadius }, // Top-right pocket
-            { x: this.pocketRadius, y: this.viewportSize.height - this.pocketRadius }, // Bottom-left pocket
-            { x: this.viewportSize.width - this.pocketRadius, y: this.viewportSize.height - this.pocketRadius }, // Bottom-right pocket
-            { x: this.viewportSize.width / 2, y: this.pocketRadius }, // Middle-top pocket
-            { x: this.viewportSize.width / 2, y: this.viewportSize.height - this.pocketRadius } // Middle-bottom pocket
+            { x: this.pocketDiameter/2, y: this.pocketDiameter/2 }, // Top-left pocket
+            { x: this.viewportSize.width - this.pocketDiameter/2, y: this.pocketDiameter/2 }, // Top-right pocket
+            { x: this.pocketDiameter/2, y: this.viewportSize.height - this.pocketDiameter/2 }, // Bottom-left pocket
+            { x: this.viewportSize.width - this.pocketDiameter/2, y: this.viewportSize.height - this.pocketDiameter/2 }, // Bottom-right pocket
+            { x: this.viewportSize.width / 2, y: this.pocketDiameter/2 }, // Middle-top pocket
+            { x: this.viewportSize.width / 2, y: this.viewportSize.height - this.pocketDiameter/2 } // Middle-bottom pocket
         ];
     }
 
@@ -27,7 +27,7 @@ export class PoolTable {
         // Draw pockets (small circles at pocket locations)
         p.fill(0);
         this.pockets.forEach(pocket => {
-            p.circle(pocket.x, pocket.y, 30);
+            p.circle(pocket.x, pocket.y, this.pocketDiameter);
         });
     }
 
@@ -37,12 +37,13 @@ export class PoolTable {
                 if (!ball.isSunk) {
                     sunkBalls++;
                     ball.isSunk = true; // Mark ball as sunk
+                    balls.splice(balls.indexOf(ball), 1);
                     remainingBalls--;
                 }
             }
         });
     
-        return { sunkBalls, remainingBalls };
+        return { sunkBalls, remainingBalls, balls };
     }
 
     private checkIfBallSunk(ball: PoolBall): boolean {
@@ -56,13 +57,11 @@ export class PoolTable {
                 Math.pow(ball.position.x - pocket.x, 2) + Math.pow(ball.position.y - pocket.y, 2)
             );
     
-            const bufferMultiplier = 3;
-            if (distance < this.pocketRadius * bufferMultiplier) {
+            if (distance < ball.radius * 2) {
                 return true; // Ball is sunk
             }
         }
     
         return false;
     }
-    
 }

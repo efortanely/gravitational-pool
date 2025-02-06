@@ -1,5 +1,4 @@
 import p5 from 'p5';
-import { PoolBall } from '../../Objects/PoolBall';
 
 export abstract class Level {
     private seed: number = 0;
@@ -9,7 +8,7 @@ export abstract class Level {
     }
 
     abstract render(p: p5, timePlayed: number): void;
-    abstract handleMousePressed(p: p5): boolean;
+    abstract handleMousePressed(p: p5): void;
     abstract handleMouseReleased(p: p5): void;
     abstract handleMouseDragged(p: p5): void;
 

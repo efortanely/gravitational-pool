@@ -12,18 +12,13 @@ export class PlayableLevel extends Level {
     public balls: PoolBall[] = [];
     private initialMousePosition: Vector2D = { x: 0, y: 0 };
     private isMousePressed: boolean = false;
-    public remainingBalls: number = 10;
+    public remainingBalls: number = 15;
     private viewportSize: ViewportSize;
     private sunkBalls: number = 0;
-    private totalBalls: number = 10;
+    private totalBalls: number = 15;
     private poolAi: PoolAI;
-    
-    // AI Control toggle
     private isAIEnabled: boolean = false;
     
-    // Turn management
-    private isAITurn: boolean = false;
-
     constructor(seed: number, viewportSize: ViewportSize) {
         super(seed);
         this.viewportSize = viewportSize;
@@ -32,7 +27,7 @@ export class PlayableLevel extends Level {
         this.physics = new Physics(viewportSize);
         this.balls.forEach(ball => this.physics.addBall(ball));
         this.poolTable = new PoolTable(viewportSize);
-        this.poolAi = new PoolAI(this.physics, this.balls, this.balls[0]);
+        this.poolAi = new PoolAI(this.physics, this.balls, this.balls[0], this.poolTable);
         this.physics.balls = this.balls;
     }
 
@@ -105,46 +100,24 @@ export class PlayableLevel extends Level {
 
     public toggleAI(): void {
         this.isAIEnabled = !this.isAIEnabled;
-        if (this.isAIEnabled) {
-            this.isAITurn = true;  // Start with AI's turn if AI is enabled
-        }
-    }
-
-    public nextTurn(): void {
-        if (this.isAITurn && this.isAIEnabled) {
-            this.poolAi.makeMove();  // AI makes its move
-            console.log('AI Move Made'); // Debugging
-        } else {
-            // Player's turn, waiting for mouse input
-        }
-    
-        this.isAITurn = !this.isAITurn; // Alternate turns
     }
 
     public render(p: p5, timePlayed: number): void {
-        this.poolTable.draw(p);
-        this.physics.update(p);
-    
-        for (const ball of this.balls) {
-            ball.draw(p);
-        }
-    
-        if (this.isAIEnabled && this.isAITurn) {
-            // AI takes its turn if enabled and it is the AI's turn
-            this.nextTurn();
-        }
+        if (this.isAIEnabled)
+            this.poolAi.update(timePlayed);
     
         const result = this.poolTable.updateBallsSinking(this.balls, this.sunkBalls, this.remainingBalls);
         this.sunkBalls = result.sunkBalls;
         this.remainingBalls = result.remainingBalls;
+        this.balls = result.balls;
     
+        this.physics.update(p);
         this.poolTable.draw(p);
-        this.drawHUD(p, this.isAIEnabled, timePlayed);
-    
         this.balls.forEach(ball => ball.draw(p));
+        this.drawHUD(p, timePlayed);
     }
 
-    private drawHUD(p: p5, aiEnabled: boolean, elapsedTime: number) {
+    private drawHUD(p: p5, elapsedTime: number) {
         // Background for the HUD (semi-transparent)
         p.fill(0, 0, 0, 150); // black with transparency
         p.noStroke();
@@ -153,7 +126,7 @@ export class PlayableLevel extends Level {
         // Balls Sunk
         p.fill(255, 255, 255); // White color for text
         p.textSize(20);
-        p.textFont('Comic Sans MS'); // Cute font
+        p.textFont('Comic Sans MS');
         p.textAlign(p.LEFT, p.TOP);
         p.text(`Balls Sunk: ${this.sunkBalls}/${this.totalBalls}`, 20, 20);
     
@@ -179,11 +152,11 @@ export class PlayableLevel extends Level {
         p.fill(0); // Black text color
         p.textSize(16);
         p.textAlign(p.CENTER, p.CENTER);
-        p.text(aiEnabled ? "AI: ON" : "AI: OFF", aiButtonX + aiButtonWidth / 2, aiButtonY + aiButtonHeight / 2);
+        p.text(this.isAIEnabled ? "AI: ON" : "AI: OFF", aiButtonX + aiButtonWidth / 2, aiButtonY + aiButtonHeight / 2);
     }      
 
     public handleMouseReleased(p: p5): void {
-        if (this.isAITurn || this.isAIEnabled) return; // Skip if it's AI's turn or AI is enabled
+        if (this.isAIEnabled) return; // Skip if it's AI's turn or AI is enabled
     
         if (this.isMousePressed) {
             let deltaX, deltaY;
@@ -198,20 +171,18 @@ export class PlayableLevel extends Level {
     
             console.log('Mouse Released: DeltaX:', deltaX, 'DeltaY:', deltaY); // Debugging
     
-            const forceMultiplier = 0.5; // Adjust the multiplier to scale the force
+            const forceMultiplier = 3; // Adjust the multiplier to scale the force
             const force = { 
                 x: -deltaX * forceMultiplier, 
                 y: -deltaY * forceMultiplier 
             };
     
-            if (Math.abs(force.x) > 0.5 || Math.abs(force.y) > 0.5) {
-                this.physics.applyForceToCueBall(force);
-            }
+            this.physics.applyForceToCueBall(force);
             this.isMousePressed = false;
         }
     
         // After player has finished their move, trigger the next turn (AI's turn if enabled)
-        this.nextTurn();
+        // this.nextTurn();
     }
     
     public handleMouseDragged(p: p5): void {
@@ -236,9 +207,7 @@ export class PlayableLevel extends Level {
         }
     }
 
-    public handleMousePressed(p: p5): boolean {
-        if (this.isAIEnabled || this.isAITurn) return this.isAIEnabled; // Don't allow player to control when it's AI's turn
-    
+    public handleMousePressed(p: p5): void {    
         // Player's mouse press logic here
         if (p.touches.length > 0) {
             this.initialMousePosition = { 
@@ -267,7 +236,5 @@ export class PlayableLevel extends Level {
             this.toggleAI(); // Toggle AI state on button click
             console.log('AI Toggled:', this.isAIEnabled); // Debugging
         }
-    
-        return this.isAIEnabled;
     }
 }
