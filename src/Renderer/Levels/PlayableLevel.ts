@@ -27,7 +27,7 @@ export class PlayableLevel extends Level {
         const cueBall = new PoolBall(
             positions.cueBallPosition.x, 
             positions.cueBallPosition.y, 
-            15, // Corrected size
+            10, // Corrected size
             0,
             true
         );
@@ -37,9 +37,9 @@ export class PlayableLevel extends Level {
         for (let i = 0; i < positions.rackPositions.length; i++) {
             const pos = positions.rackPositions[i];
 
-            let ball = new PoolBall(pos.x, pos.y, 15, i + 1, false);
-            if (i === 4) { // 8-ball in center of triangle
-                ball.mass = 20;
+            let ball = new PoolBall(pos.x, pos.y, 10, i + 1, false);
+            if (i === 7) { // 8-ball in center of triangle
+                ball = new PoolBall(pos.x, pos.y, 40, i + 1, false);
             }
 
             this.balls.push(ball);
@@ -113,10 +113,12 @@ export class PlayableLevel extends Level {
                 deltaX = p.mouseX - this.initialMousePosition.x;
                 deltaY = p.mouseY - this.initialMousePosition.y;
             }
+
+            const forceMultiplier = 0.5;
     
             const force = { 
-                x: -deltaX * 0.2, 
-                y: -deltaY * 0.2
+                x: -deltaX * forceMultiplier, 
+                y: -deltaY * forceMultiplier
             };
     
             if (Math.abs(force.x) > 0.5 || Math.abs(force.y) > 0.5) {

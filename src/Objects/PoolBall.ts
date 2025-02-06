@@ -20,7 +20,7 @@ import ball15Sprite from '../public/balls/15ball.png';
 import cueBallSprite from '../public/balls/cueball.png';
 
 export class PoolBall {
-    protected position: Vector2D;
+    public position: Vector2D;
     public velocity: Vector2D;
     public mass: number;
     public radius: number;
