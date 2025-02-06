@@ -8,8 +8,8 @@ export class EndScreen extends Level {
         super(seed);
     }
 
-    handleMousePressed(p: p5): void {
-
+    handleMousePressed(p: p5): boolean {
+        return false;
     }
 
     handleMouseReleased(p: p5): void {

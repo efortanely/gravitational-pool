@@ -6,8 +6,9 @@ export class StartScreen extends Level {
         super(seed);
     }
 
-    handleMousePressed(p: p5): void {
+    handleMousePressed(p: p5): boolean {
         // Empty implementation required by abstract class
+        return false;
     }
     
     handleMouseReleased(p: p5): void {
@@ -31,6 +32,7 @@ export class StartScreen extends Level {
         
         // Draw title
         p.textSize(48);
+        p.textFont('Comic Sans MS');
         p.fill(255); // White text
         p.text('Gravitational Pool', p.width / 2, p.height / 2 - 50);
         

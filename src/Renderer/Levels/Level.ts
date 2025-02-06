@@ -9,7 +9,7 @@ export abstract class Level {
     }
 
     abstract render(p: p5, timePlayed: number): void;
-    abstract handleMousePressed(p: p5): void;
+    abstract handleMousePressed(p: p5): boolean;
     abstract handleMouseReleased(p: p5): void;
     abstract handleMouseDragged(p: p5): void;
 

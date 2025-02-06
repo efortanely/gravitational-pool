@@ -22,24 +22,29 @@ import cueBallSprite from '../public/balls/cueball.png';
 export class PoolBall {
     public position: Vector2D;
     public velocity: Vector2D;
-    public mass: number;
-    public radius: number;
+    public mass: number = 0.66 * 15;
+    public radius: number = 15;
     protected image: p5.Image | null = null;
     protected spritesheet: p5.Image | null = null;
-    protected isCueBall: boolean;
+    public isCueBall: boolean;
     protected frameIndex: number = 0;
     protected totalFrames: number = 15;
     protected ballType: number;
     private lastFrameTime: number = 0;
     private frameDelay: number = 100; // Base time delay (ms) between frames
+    public isSunk: boolean = false;
     
     constructor(x: number, y: number, mass: number, ballType: number, isCueBall: boolean) {
         this.position = { x, y };
         this.velocity = { x: 0, y: 0 };
-        this.mass = mass;
-        this.radius = 15; // Updated radius to 15
         this.isCueBall = isCueBall;
         this.ballType = ballType;
+        this.updateSize(15);
+    }
+
+    protected updateSize(radius: number){
+        this.radius = radius;
+        this.mass = 0.66 * this.radius;
     }
 
     /** Preloads images and spritesheets */
