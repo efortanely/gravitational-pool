@@ -7,6 +7,7 @@ export class Physics {
     private balls: PoolBall[] = [];
     private maxForce: number = 100; // Maximum force for cue ball hit
     private viewportSize: ViewportSize;
+    private gravitationalConstant: number = 0.1; // Adjust this value to control the strength of gravity
 
     constructor(viewportSize: ViewportSize, balls: PoolBall[] = []) {
         this.balls = balls;
@@ -37,6 +38,21 @@ export class Physics {
     }
 
     public update(p: p5): void {
+        // Apply gravitational force between all pairs of balls
+        for (let i = 0; i < this.balls.length; i++) {
+            for (let j = i + 1; j < this.balls.length; j++) {
+                const ball1 = this.balls[i];
+                const ball2 = this.balls[j];
+
+                // Calculate gravitational force
+                const gravitationalForce = this.calculateGravitationalForce(ball1, ball2);
+
+                // Apply gravitational force to both balls
+                ball1.applyForce(gravitationalForce);
+                ball2.applyForce({ x: -gravitationalForce.x, y: -gravitationalForce.y });
+            }
+        }
+
         // Check for ball collisions
         for (let i = 0; i < this.balls.length; i++) {
             for (let j = i + 1; j < this.balls.length; j++) {
@@ -52,11 +68,27 @@ export class Physics {
 
         // Update balls
         for (const ball of this.balls) {
-            // Calculate centripetal force
-            // ball.applyCentripetalForce();
-
             ball.update(p);
         }
+    }
+
+    // Calculate gravitational force between two balls
+    private calculateGravitationalForce(ball1: PoolBall, ball2: PoolBall): Vector2D {
+        const dx = ball2.getPosition().x - ball1.getPosition().x;
+        const dy = ball2.getPosition().y - ball1.getPosition().y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Prevent division by zero
+        if (distance === 0) return { x: 0, y: 0 };
+
+        // Calculate gravitational force magnitude
+        const forceMagnitude = (this.gravitationalConstant * ball1['mass'] * ball2['mass']) / (distance * distance);
+
+        // Calculate force components
+        const forceX = forceMagnitude * (dx / distance);
+        const forceY = forceMagnitude * (dy / distance);
+
+        return { x: forceX, y: forceY };
     }
 
     // Resolve elastic collision between two balls
