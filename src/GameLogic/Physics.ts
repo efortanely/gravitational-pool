@@ -4,7 +4,7 @@ import { Vector2D, ViewportSize } from "../types";
 
 // Physics engine to handle ball interactions
 export class Physics {
-    private balls: PoolBall[] = [];
+    public balls: PoolBall[] = [];
     private maxForce: number = 100; // Maximum force for cue ball hit
     private viewportSize: ViewportSize;
     private gravitationalConstant: number = 0.1; // Adjust this value to control the strength of gravity

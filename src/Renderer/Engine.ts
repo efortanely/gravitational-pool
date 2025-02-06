@@ -7,7 +7,6 @@ import p5 from 'p5';
 import { PoolBall } from "../Objects/PoolBall";
 // import { ShrinkRay } from "../Objects/ShrinkRay";
 import { PoolTable } from "../Objects/PoolTable";
-import { Physics } from "../GameLogic/Physics";
 
 export class Engine {
     private levels: Level[];
@@ -23,17 +22,15 @@ export class Engine {
     private totalBalls: number = 10;
     // private shrinkRay: ShrinkRay;
     private poolTable: PoolTable;
-    private physics: Physics;
 
     constructor() {
         this.gameState = GameState.START;
         // this.shrinkRay = new ShrinkRay(5);
         this.poolTable = new PoolTable(this.viewportSize);
-        this.physics = new Physics(this.viewportSize);
     
         this.levels = [
             new StartScreen(this.seed),
-            new PlayableLevel(this.seed, this.viewportSize, this.physics),
+            new PlayableLevel(this.seed, this.viewportSize),
             new EndScreen(this.seed)
         ];
     

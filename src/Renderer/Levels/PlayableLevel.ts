@@ -24,15 +24,16 @@ export class PlayableLevel extends Level {
     // Turn management
     private isAITurn: boolean = false;
 
-    constructor(seed: number, viewportSize: ViewportSize, physics: Physics) {
+    constructor(seed: number, viewportSize: ViewportSize) {
         super(seed);
-        this.physics = physics;
         this.viewportSize = viewportSize;
 
         this.createObjectBalls();
+        this.physics = new Physics(viewportSize);
         this.balls.forEach(ball => this.physics.addBall(ball));
         this.poolTable = new PoolTable(viewportSize);
-        this.poolAi = new PoolAI(physics, this.balls, this.balls[0]);
+        this.poolAi = new PoolAI(this.physics, this.balls, this.balls[0]);
+        this.physics.balls = this.balls;
     }
 
     private createObjectBalls(): void {
