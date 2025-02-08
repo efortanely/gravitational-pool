@@ -1,0 +1,13 @@
+- improve momentum transfer between balls
+- clumps of balls behave like singular mass
+- more dramatic gravity (stronger closer in and weaker further away)
+- balls should stop moving after a time threshold each turn so they don't fall back into each other over time
+- less friction should cause space but not too little so
+- cue trajectory should curve around balls
+  - hitting cue ball with multiple angles and (x, y) positions
+  - add spin hits to balls
+- orbiting
+- balls should always spin like planets
+- sphere of influence indicators for gravity
+- add indicator for direction and force of hitting cue ball
+- fix overlap detection for the pockets and balls to determine if ball sunk
