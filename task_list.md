@@ -11,3 +11,4 @@
 - sphere of influence indicators for gravity
 - add indicator for direction and force of hitting cue ball
 - fix overlap detection for the pockets and balls to determine if ball sunk
+- add more sophisticated AI agent
