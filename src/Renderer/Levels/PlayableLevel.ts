@@ -111,7 +111,7 @@ export class PlayableLevel extends Level {
         this.remainingBalls = result.remainingBalls;
         this.balls = result.balls;
     
-        this.physics.update(p);
+        this.physics.update(p, timePlayed);
         this.poolTable.draw(p);
         this.balls.forEach(ball => ball.draw(p));
         this.drawHUD(p, timePlayed);
@@ -180,12 +180,9 @@ export class PlayableLevel extends Level {
             this.physics.applyForceToCueBall(force);
             this.isMousePressed = false;
         }
-    
-        // After player has finished their move, trigger the next turn (AI's turn if enabled)
-        // this.nextTurn();
     }
     
-    public handleMouseDragged(p: p5): void {
+    public handleMouseDragged(p: p5): void {        
         if (this.isMousePressed) {
             let mouseX, mouseY;
     
@@ -200,10 +197,6 @@ export class PlayableLevel extends Level {
             // Visualize the direction of force (cue stick) as a line
             p.stroke(0);
             p.line(mouseX, mouseY, this.initialMousePosition.x, this.initialMousePosition.y);
-    
-            // Optionally, display a circle or something at the end of the line to indicate where force is being applied
-            p.fill(255, 0, 0);
-            p.circle(mouseX, mouseY, 5); // Small red circle to mark mouse position
         }
     }
 

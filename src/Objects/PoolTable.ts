@@ -5,7 +5,7 @@ import { PoolBall } from "./PoolBall";
 export class PoolTable {
     private viewportSize: ViewportSize;
     private tableColor: string = "#2E8B57"; // Green pool table
-    public pockets: Vector2D[]; // List of pocket positions
+    public pockets: Vector2D[];
     private pocketDiameter = 30;
 
     constructor(viewportSize: ViewportSize) {
@@ -53,13 +53,10 @@ export class PoolTable {
         }
     
         for (let pocket of this.pockets) {
-            const distance = Math.sqrt(
-                Math.pow(ball.position.x - pocket.x, 2) + Math.pow(ball.position.y - pocket.y, 2)
-            );
+            const distance = Math.sqrt(Math.pow(ball.position.x - pocket.x, 2) + Math.pow(ball.position.y - pocket.y, 2));
     
-            if (distance < ball.radius * 2) {
-                return true; // Ball is sunk
-            }
+            if (distance <= ball.radius)
+                return true;
         }
     
         return false;

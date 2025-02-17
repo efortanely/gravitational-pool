@@ -22,7 +22,7 @@ import cueBallSprite from '../public/balls/cueball.png';
 export class PoolBall {
     public position: Vector2D;
     public velocity: Vector2D;
-    public mass: number = 0.66 * 15;
+    public mass: number = 20;
     public radius: number = 15;
     protected image: p5.Image | null = null;
     protected spritesheet: p5.Image | null = null;
@@ -33,6 +33,7 @@ export class PoolBall {
     private lastFrameTime: number = 0;
     private frameDelay: number = 100; // Base time delay (ms) between frames
     public isSunk: boolean = false;
+    private lastCollisionFrame: number | null = null;
     
     constructor(x: number, y: number, mass: number, ballType: number, isCueBall: boolean) {
         this.position = { x, y };
@@ -77,7 +78,7 @@ export class PoolBall {
 
     /** Applies rolling friction */
     public applyFriction(): void {
-        const friction = 0.01;
+        const friction = 0.012;
         this.velocity.x *= 1 - friction;
         this.velocity.y *= 1 - friction;
     }
@@ -88,35 +89,86 @@ export class PoolBall {
         this.velocity.y += force.y / this.mass;
     }
 
-    /** Updates the ball's position and animation */
     public update(p: p5): void {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
         this.applyFriction();
-
-        const currentTime = p.millis(); // Get current time in milliseconds
+    
+        const currentTime = p.millis();
         if (currentTime - this.lastFrameTime >= this.frameDelay) {
-            this.lastFrameTime = currentTime; // Update last frame time
+            this.lastFrameTime = currentTime;
             const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
-
+    
             if (speed > 0.1) {
-                // Calculate the angle of velocity
-                const angle = p.atan2(this.velocity.y, this.velocity.x);
+                // Determine if movement is more horizontal or vertical
+                const angle = Math.atan2(Math.abs(this.velocity.y), Math.abs(this.velocity.x));
+                const isMoreHorizontal = angle < Math.PI / 4;
+    
+                // Calculate number of frames to advance based on speed
+                const frameAdvance = Math.max(1, Math.floor(speed / 5));
                 
-                // Map the angle to a frame index. 0 to 2*PI range for a full rotation.
-                this.frameIndex = Math.floor((angle + p.PI) / (2 * p.PI) * this.totalFrames);
+                if (isMoreHorizontal) {
+                    // Use horizontal rotation frames (0-7)
+                    if (this.frameIndex >= 8) {
+                        this.frameIndex = 0;
+                    }
+                    
+                    if (this.velocity.x > 0) {
+                        this.frameIndex = (this.frameIndex + frameAdvance) % 8;
+                    } else {
+                        this.frameIndex = (this.frameIndex + (8 - frameAdvance)) % 8;
+                    }
+                } else {
+                    // Use vertical rotation frames (0, 8-14)
+                    if (this.frameIndex < 8 && this.frameIndex !== 0) {
+                        this.frameIndex = 0;
+                    }
+                    
+                    if (this.velocity.y < 0) { // Upward motion
+                        if (this.frameIndex === 0) {
+                            this.frameIndex = 8;
+                        } else {
+                            const newIndex = this.frameIndex + frameAdvance;
+                            if (newIndex > 14) {
+                                this.frameIndex = 0;
+                            } else {
+                                this.frameIndex = newIndex;
+                            }
+                        }
+                    } else { // Downward motion
+                        if (this.frameIndex === 8) {
+                            this.frameIndex = 0;
+                        } else if (this.frameIndex === 0) {
+                            this.frameIndex = 14;
+                        } else {
+                            const newIndex = this.frameIndex - frameAdvance;
+                            if (newIndex < 8) {
+                                this.frameIndex = 0;
+                            } else {
+                                this.frameIndex = newIndex;
+                            }
+                        }
+                    }
+                }
+                
+                // Define the base delay for slowest speed and the min delay for fastest speed
+                const maxDelay = 600;  // Much slower frame changes for small speeds
+                const minDelay = 80;   // Very fast frame changes for high speeds
 
-                // Adjust frame delay based on speed, faster speeds will update frames quicker
-                const speedFactor = Math.min(1, speed / 10); // Speed factor based on velocity
-                this.frameDelay = 200 * (1 - speedFactor); // Decrease frame delay with speed
+                // Exponential decay function for smooth transition
+                const speedFactor = 1 - Math.exp(-speed / 2);
+
+                // Compute frame delay based on speedFactor
+                this.frameDelay = maxDelay * (1 - speedFactor) + minDelay;
+            } else {
+                // When static, slow horizontal rotation
+                this.frameIndex = (this.frameIndex + 1) % 8;
+                this.frameDelay = 150;
             }
         }
     }
 
-    /** Renders the ball with sprite animation */
     public draw(p: p5): void {
-        p.noStroke();
-
         if (this.spritesheet) {
             const frameWidth = this.spritesheet.width / this.totalFrames;
             const frameHeight = this.spritesheet.height;
@@ -129,11 +181,6 @@ export class PoolBall {
                 frameWidth, frameHeight
             );
         }
-    }
-
-    /** Handles rendering during gameplay */
-    public render(p: p5, timePlayed: number): void {
-        this.draw(p);
     }
 
     /** Handles mouse dragging interaction */
@@ -150,5 +197,13 @@ export class PoolBall {
 
     public getPosition(): Vector2D{
         return this.position;
+    }
+
+    public setCollisionFrame(frame: number){
+        this.lastCollisionFrame = frame;
+    }
+
+    public getCollisionFrame(): number | null {
+        return this.lastCollisionFrame;
     }
 }

@@ -5,9 +5,10 @@ import { Vector2D, ViewportSize } from "../types";
 // Physics engine to handle ball interactions
 export class Physics {
     public balls: PoolBall[] = [];
-    private maxForce: number = 100; // Maximum force for cue ball hit
+    private maxForce: number = 150; // Maximum force for cue ball hit
     private viewportSize: ViewportSize;
-    private gravitationalConstant: number = 0.1; // Adjust this value to control the strength of gravity
+    private gravitationalConstant: number = 0.5; // Adjust this value to control the strength of gravity
+    private lagForGravityFrameCount: number = 200;
 
     constructor(viewportSize: ViewportSize, balls: PoolBall[] = []) {
         this.balls = balls;
@@ -37,12 +38,17 @@ export class Physics {
         cueBall.applyForce(force);
     }
 
-    public update(p: p5): void {
+    public update(p: p5, frame: number): void {
         // Apply gravitational force between all pairs of balls
         for (let i = 0; i < this.balls.length; i++) {
             for (let j = i + 1; j < this.balls.length; j++) {
                 const ball1 = this.balls[i];
                 const ball2 = this.balls[j];
+                
+                // Skip gravitational force after a certain number of frames
+                if(ball1.getCollisionFrame() !== null && (ball1.getCollisionFrame() as number + this.lagForGravityFrameCount) > frame
+                    && ball2.getCollisionFrame() !== null && (ball2.getCollisionFrame() as number + this.lagForGravityFrameCount) > frame)
+                    continue;
 
                 // Calculate gravitational force
                 const gravitationalForce = this.calculateGravitationalForce(ball1, ball2);
@@ -61,6 +67,8 @@ export class Physics {
 
                 // Ball collision detection and resolution
                 this.resolveCollision(ball1, ball2);
+                ball1.setCollisionFrame(frame);
+                ball2.setCollisionFrame(frame);
             }
         }
 
@@ -78,8 +86,8 @@ export class Physics {
         const dy = ball2.getPosition().y - ball1.getPosition().y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Prevent division by zero
-        if (distance === 0) return { x: 0, y: 0 };
+        if (distance === 0)
+            return { x: 0, y: 0 };
 
         // Calculate gravitational force magnitude
         const forceMagnitude = (this.gravitationalConstant * ball1['mass'] * ball2['mass']) / (distance * distance);
@@ -118,7 +126,8 @@ export class Physics {
             // If moving towards each other
             if (velocityAlongNormal < 0) {
                 // Calculate impulse scalar
-                const impulse = (2 * velocityAlongNormal) / (ball1['mass'] + ball2['mass']);
+                const scaling = 2;
+                const impulse = scaling * (2 * velocityAlongNormal) / (ball1['mass'] + ball2['mass']);
 
                 // Apply impulse to each ball
                 ball1.applyForce({ x: -impulse * ball2['mass'] * normal.x, y: -impulse * ball2['mass'] * normal.y });
