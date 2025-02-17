@@ -1,4 +1,3 @@
-- more dramatic gravity (stronger closer in and weaker further away)
 - cue trajectory should curve around balls
   - hitting cue ball with multiple angles and (x, y) positions
   - add spin hits to balls
@@ -6,5 +5,5 @@
 - sphere of influence indicators for gravity
 - add indicator for direction and force of hitting cue ball
 - add more sophisticated AI agent
-- fix animations to more represent velocities
+- improve ball animations
 - fix pocket detection (notice it specifically breaks for approaching from the left for the top middle pocket)
