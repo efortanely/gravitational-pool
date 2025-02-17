@@ -3,7 +3,6 @@
   - hitting cue ball with multiple angles and (x, y) positions
   - add spin hits to balls
 - orbiting
-- balls should always spin like planets
 - sphere of influence indicators for gravity
 - add indicator for direction and force of hitting cue ball
 - add more sophisticated AI agent
