@@ -47,16 +47,21 @@ export class PoolTable {
     }
 
     private checkIfBallSunk(ball: PoolBall): boolean {
-        // If the ball is the cue ball, it cannot be sunk
+        // Cue ball cannot be sunk
         if (ball.isCueBall) {
             return false;
         }
     
-        for (let pocket of this.pockets) {
-            const distance = Math.sqrt(Math.pow(ball.position.x - pocket.x, 2) + Math.pow(ball.position.y - pocket.y, 2));
+        const pocketRadius = this.pocketDiameter / 2;
+        
+        for (const pocket of this.pockets) {
+            const dx = ball.position.x - pocket.x;
+            const dy = ball.position.y - pocket.y;
+            const distanceSquared = dx * dx + dy * dy;
     
-            if (distance <= ball.radius)
+            if (distanceSquared <= (ball.radius + pocketRadius) ** 2) {
                 return true;
+            }
         }
     
         return false;

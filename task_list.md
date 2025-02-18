@@ -6,4 +6,3 @@
 - add indicator for direction and force of hitting cue ball
 - add more sophisticated AI agent
 - improve ball animations
-- fix pocket detection (notice it specifically breaks for approaching from the left for the top middle pocket)
